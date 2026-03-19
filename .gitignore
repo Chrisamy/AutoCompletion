@@ -1,0 +1,32 @@
+# Ignore Maven target directory
+/target/
+
+# IntelliJ IDEA
+/.idea/
+*.iml
+
+# Compiled class files
+*.class
+
+# Misc
+*.log
+.DS_Store
+
+# VSCode
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# Mac
+.DS_Store
+
+# Temporary files
+*~
+
+# Build directories
+/out/
+/bin/
+
