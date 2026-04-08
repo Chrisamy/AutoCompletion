@@ -28,7 +28,8 @@ public class HashFrequencyTable implements FrequencyTable {
      */
     @Override
     public void increment(String token) {
-        throw new UnsupportedOperationException("TODO 1 — increment non implémenté");
+        map.put(token, map.getOrDefault(token, 0) + 1);
+        totalCount++;
     }
 
     /**
@@ -38,7 +39,7 @@ public class HashFrequencyTable implements FrequencyTable {
      */
     @Override
     public int get(String token) {
-        throw new UnsupportedOperationException("TODO 2 — get non implémenté");
+        return map.getOrDefault(token, 0);
     }
 
     /**
@@ -49,7 +50,7 @@ public class HashFrequencyTable implements FrequencyTable {
      */
     @Override
     public int total() {
-        throw new UnsupportedOperationException("TODO 3 — total non implémenté");
+        return totalCount;
     }
 
     /**
