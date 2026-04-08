@@ -58,7 +58,7 @@ public class HashFrequencyTable implements FrequencyTable {
      */
     @Override
     public Set<String> vocabulary() {
-        throw new UnsupportedOperationException("TODO 4 — vocabulary non implémenté");
+        return map.keySet();
     }
 
     /**
@@ -66,7 +66,7 @@ public class HashFrequencyTable implements FrequencyTable {
      */
     @Override
     public boolean isEmpty() {
-        throw new UnsupportedOperationException("TODO 5 — isEmpty non implémenté");
+        return map.isEmpty();
     }
 
     /**
