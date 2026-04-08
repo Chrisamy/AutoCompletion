@@ -77,6 +77,7 @@ public class HashFrequencyTable implements FrequencyTable {
      */
     @Override
     public void incrementBy(String token, int count) {
-        throw new UnsupportedOperationException("TODO 6 — incrementBy non implémenté");
+        map.put(token, map.getOrDefault(token, 0) + count);
+        totalCount += count;
     }
 }
