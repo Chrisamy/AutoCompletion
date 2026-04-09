@@ -46,10 +46,10 @@ public class PrefixTrie implements Trie {
 
             // Pour chaque caractère absent
             if( current.children.get(c) == null ) {
-                current.children.put(c) = new TrieNode();
+                current.children.put(c, new TrieNode());
                 nodeCount++;
             }
-            current = current.children[c];
+            current = current.children.get(c);
         }
 
         // Au nœud terminal
@@ -78,7 +78,7 @@ public class PrefixTrie implements Trie {
             if( current.children.get(c) == null ) {
                 return 0;
             }
-            current = current.children[c];
+            current = current.children.get(c);
         }
 
         // Au nœud terminal
@@ -119,7 +119,7 @@ public class PrefixTrie implements Trie {
         FrequencyTable table = dfs(current, new StringBuilder(prefix));
 
         // Étape 4
-        return new HeapTopKStrategy().topK(table, k)
+        return new HeapTopKStrategy().topK(table, k);
     }
 
     /**
