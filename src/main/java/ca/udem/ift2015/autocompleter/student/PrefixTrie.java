@@ -38,7 +38,26 @@ public class PrefixTrie implements Trie {
      * à {@code node.frequency}.
      */
     public void insert(String word, int frequency) {
-        throw new UnsupportedOperationException("TODO 8 — insert non implémenté");
+        // Tiré du fichier de code ''ArrayTrie'' donné en classe puis adapté pour HashMap.
+        TrieNode current = this.root;
+
+        // Parcours caractère par caractère
+        for( char c : word.toCharArray() ) {
+
+            // Pour chaque caractère absent
+            if( current.children.get(c) == null ) {
+                current.children.put(c) = new TrieNode();
+                nodeCount++;
+            }
+            current = current.children[c];
+        }
+
+        // Au nœud terminal
+        if(!current.isEndOfWord) {
+            current.isEndOfWord = true;
+            size++;
+        }
+        current.frequency += frequency;
     }
 
     /**
@@ -49,7 +68,24 @@ public class PrefixTrie implements Trie {
      * seulement si {@code node.isEndOfWord} est vrai.
      */
     public int search(String word) {
-        throw new UnsupportedOperationException("TODO 9 — search non implémenté");
+        // Tiré du fichier de code ''ArrayTrie'' donné en classe puis adapté pour HashMap.
+        TrieNode current = this.root;
+
+        // Parcours caractère par caractère
+        for( char c : word.toCharArray() ) {
+
+            // Lorsqu'un nœud est manquant
+            if( current.children.get(c) == null ) {
+                return 0;
+            }
+            current = current.children[c];
+        }
+
+        // Au nœud terminal
+        if(current.isEndOfWord) {
+            return current.frequency;
+        }
+        return 0; // Le mot n'est pas dans le Trie.
     }
 
     /**
@@ -67,7 +103,23 @@ public class PrefixTrie implements Trie {
      * </ol>
      */
     public List<String> complete(String prefix, int k) {
-        throw new UnsupportedOperationException("TODO 10 — complete non implémenté");
+        // Étape 1
+        if (k <= 0)  {
+            return Collections.emptyList();
+        }
+        // Étape 2
+        TrieNode current = this.root;
+        for( char c : prefix.toCharArray() ) {
+            if( current.children.get(c) == null ) {
+                return Collections.emptyList();
+            }
+            current = current.children.get(c);
+        }
+        // Étape 3
+        FrequencyTable table = dfs(current, new StringBuilder(prefix));
+
+        // Étape 4
+        return new HeapTopKStrategy().topK(table, k)
     }
 
     /**
