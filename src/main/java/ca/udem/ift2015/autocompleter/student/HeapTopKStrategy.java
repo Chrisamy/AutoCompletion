@@ -33,6 +33,35 @@ public class HeapTopKStrategy implements TopKStrategy {
      */
     @Override
     public List<String> topK(FrequencyTable table, int k) {
-        throw new UnsupportedOperationException("TODO 7 — topK non implémenté");
+
+        // Vérifier les cas de base
+        if (k<= 0 || table.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Comparateur : fréquence croissante, puis ordre lexicographique décroissant
+        Comparator<String> comparator = Comparator.comparingInt(table::get)
+                .thenComparing(Comparator.reverseOrder());
+
+        // Min-tas de taille k
+        PriorityQueue<String> heap = new PriorityQueue<>(comparator);
+
+        // Parcourir le vocabulaire et maintenir un tas de taille k
+        for (String token : table.vocabulary()) {
+            heap.add(token);
+            if (heap.size() > k) {
+                heap.poll();
+    }}
+
+        // Extraire les éléments du tas dans une liste
+        List<String> result = new ArrayList<>(heap);
+
+        // Trier la liste avec le même comparateur, puis inverser pour ordre décroissant
+        result.sort(comparator);
+        Collections.reverse(result);
+
+        return result;
+
     }
 }
+
