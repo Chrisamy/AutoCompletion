@@ -5,6 +5,7 @@ import ca.udem.ift2015.autocompleter.model.NGramModel;
 import ca.udem.ift2015.autocompleter.model.TopKStrategy;
 import ca.udem.ift2015.autocompleter.model.Trie;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,29 @@ public class KatzBackoffModel implements NGramModel {
      */
     @Override
     public void train(List<List<String>> sentences) {
-        throw new UnsupportedOperationException("TODO 11 — train non implémenté");
+        for (List<String> sentence : sentences) {
+            for (int i = 0; i < sentence.size(); i++) {
+                String w = sentence.get(i);
+
+                // Incrémenter unigrams et insérer dans le trie
+                unigrams.increment(w);
+                trie.insert(w, 1);
+
+                // Incrémenter bigrams
+                if (i >= 1) {
+                    String w_prev = sentence.get(i - 1);
+                    bigrams.computeIfAbsent(w_prev, k -> new HashFrequencyTable())
+                            .increment(w);
+                }
+
+                // Incrémenter trigrams
+                if (i >= 2) {
+                    String key = sentence.get(i - 2) + " " + sentence.get(i - 1);
+                    trigrams.computeIfAbsent(key, k -> new HashFrequencyTable())
+                            .increment(w);
+                }
+            }
+        }
     }
 
     /**
@@ -72,7 +95,33 @@ public class KatzBackoffModel implements NGramModel {
      */
     @Override
     public List<String> topK(int k, String... context) {
-        throw new UnsupportedOperationException("TODO 12 — topK non implémenté");
+
+        // Vérifier les cas de base
+        if (k <= 0 || unigrams.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+
+        // Repli strict de Katz
+        if (context.length >= 2) {
+            String key = context[context.length - 2] + " " + context[context.length - 1];
+            if (trigrams.containsKey(key)) {
+                return strategy.topK(trigrams.get(key), k);
+            }
+        }
+
+
+        // Vérifier les bigrams
+        if (context.length >= 1) {
+            String prev = context[context.length - 1];
+            if (bigrams.containsKey(prev)) {
+                return strategy.topK(bigrams.get(prev), k);
+            }
+        }
+
+
+        // Retourner les unigrams
+        return strategy.topK(unigrams, k);
     }
 
     /**
