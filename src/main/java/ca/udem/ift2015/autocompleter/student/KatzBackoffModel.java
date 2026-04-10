@@ -132,7 +132,8 @@ public class KatzBackoffModel implements NGramModel {
      */
     @Override
     public String predict(String... context) {
-        throw new UnsupportedOperationException("TODO 13 — predict non implémenté");
+        List<String> result = topK(1, context);
+        return result.isEmpty() ? null : result.get(0);
     }
 
     /**
@@ -142,7 +143,7 @@ public class KatzBackoffModel implements NGramModel {
      */
     @Override
     public List<String> complete(String prefix, int k) {
-        throw new UnsupportedOperationException("TODO 14 — complete non implémenté");
+        return trie.complete(prefix, k);
     }
 
     /** Fourni — délègue à unigrams.get() (fonctionnel dès que TODO 2 est implémenté). */
