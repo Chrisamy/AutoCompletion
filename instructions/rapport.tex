@@ -34,6 +34,7 @@
 
 % ── Mise en page ──────────────────────────────────────────────────────────────
 \geometry{a4paper, top=2.5cm, bottom=3cm, left=2.5cm, right=2.5cm}
+\setlength{\headheight}{13.6pt}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.7em}
 \setlist[itemize]{topsep=0.2em, partopsep=0pt, itemsep=0.3em, parsep=0pt}
@@ -88,8 +89,8 @@
 
   \vspace{28mm}
   {\large Par\\[6pt]
-  Prénom1 Nom1\\
-  Prénom2 Nom2}
+  David Serafini\\
+  Damia Boudjema}
 
   \vspace{22mm}
   {\large Présenté à\\[6pt]
@@ -140,15 +141,80 @@ et expliquez comment les opérations principales maintiennent ces invariants.
 
 \subsection*{1a. Table de fréquences (\jclass{HashMap}) \pts{4}}
 
-\answerspace{10em}
+La \jclass{HashFrequencyTable} repose sur deux champs : une \jclass{HashMap<String, Integer>}
+qui associe chaque token à son nombre d'occurrences, et un entier \texttt{totalCount}
+qui représente le total cumulé de toutes les observations.
+
+\textbf{Invariants à maintenir :}
+\begin{enumerate}
+  \item Tout token présent dans la map a un compteur $\geq 1$. On ne stocke jamais la valeur 0.
+        si un token n'a pas encore été observé, il est absent de la map.
+  \item \texttt{totalCount} vaut toujours la somme de tous les compteurs stockés :
+        $\texttt{totalCount} = \sum_{t \in \texttt{map}} \texttt{map.get}(t)$.
+  \item \texttt{vocabulary()} retourne exactement \texttt{map.keySet()}, soit
+        l'ensemble des tokens ayant été vus au moins une fois.
+\end{enumerate}
+
+\texttt{increment(t)} utilise \texttt{getOrDefault(t, 0) + 1} : un token absent reçoit
+directement 1 jamais 0, donc l'invariant 1 est toujours respecté. \texttt{totalCount}
+est incrémenté en même temps, ce qui maintient l'invariant 2. \texttt{incrementBy(t, c)}
+suit la même logique avec $+c$ au lieu de $+1$, comme $c \geq 1$, aucun problème.
+Les méthodes \texttt{get} et \texttt{total} sont de simples lectures, elles ne changent rien.
+
+Toutes les opérations s'exécutent en \bigo{1} amorti grâce au hachage.
 
 \subsection*{1b. Arbre de préfixes (\jclass{PrefixTrie}) \pts{4}}
 
-\answerspace{10em}
+La \jclass{PrefixTrie} est une structure arborescente où chaque noeud (\jclass{TrieNode})
+contient une \jclass{HashMap<Character, TrieNode>} pour ses enfants, un booléen
+\texttt{isEndOfWord} et un entier \texttt{frequency}. La trie suit aussi \texttt{size}
+(nombre de mots distincts insérés) et \texttt{nodeCount} (noeuds créés hors racine).
+
+\textbf{Invariants :}
+\begin{enumerate}
+  \item Chaque chemin de la racine vers un noeud représente un préfixe unique. Deux mots
+        qui commencent pareil ("the" et "there") partagent les mêmes noeuds pour
+        les caractères communs et c'est précisément ce qui fait l'intérêt du trie.
+  \item Un noeud a \texttt{isEndOfWord = true} ssi le chemin jusqu'à lui forme un mot
+        inséré. Dans ce cas, \texttt{frequency} $\geq 1$.
+  \item \texttt{size} est égal au nombre de noeuds avec \texttt{isEndOfWord = true}
+        dans l'arbre entier.
+\end{enumerate}
+
+\texttt{insert(word, freq)} descend caractère par caractère depuis la racine en créant
+au passage les noeuds manquants (\texttt{nodeCount++}). Au noeud final si c'est une nouvelle
+fin de mot \texttt{isEndOfWord} passe à \texttt{true} et \texttt{size} est incrémenté.
+\texttt{frequency} est toujours augmenté de \texttt{freq} donc il reste $\geq 1$ après la
+première insertion. Les opérations \texttt{search} et \texttt{complete} ne font que lire
+la structure aucun invariant n'est affecté.
+
+La descente dans le trie se fait en \bigo{|w|} où $|w|$ est la longueur du mot.
 
 \subsection*{1c. Tas min (\jclass{PriorityQueue}) \pts{4}}
 
-\answerspace{10em}
+Dans \jclass{HeapTopKStrategy} on utilise une \jclass{PriorityQueue} Java avec un
+comparateur par fréquence croissante (et lexicographique décroissant à égalité). L'idée
+est que le sommet du tas est toujours le  "moins bon" parmi les $k$ candidats retenus
+ce qui permet de décider rapidement si un nouveau token vaut la peine d'entrer.
+
+\textbf{Invariants :}
+\begin{enumerate}
+  \item \textbf{Propriété de tas min :} Chaque noeud est plus petit que ses enfants selon
+        le comparateur. Le minimum se trouve donc toujours à la racine, accessible en \bigo{1}.
+  \item \textbf{Taille $\leq k$ :} Dès qu'on dépasse $k$ éléments on retire le minimum.
+        Le tas ne contient jamais plus de $k$ tokens simultanément.
+  \item \textbf{Contenu optimal :} En fin de parcours le tas contient les $k$ meilleurs
+        tokens vus. Comme on n'élimine que le minimum aucun token plus fréquent ne peut
+        avoir été rejeté à tort.
+\end{enumerate}
+
+\texttt{heap.add(token)} insère l'élément et le fait remonter (\emph{sift-up}) pour rétablir
+l'ordre en \bigo{\log k}. \texttt{heap.poll()} si la taille dépasse $k$ retire le minimum
+et fait redescendre le remplaçant (\emph{sift-down}) en \bigo{\log k}. Le
+\texttt{Collections.reverse()} final sert juste à présenter les résultats en ordre
+décroissant il ne modifie pas les invariants du tas.
+
+La complexité globale de \texttt{topK} est \bigo{V \log k} pour un vocabulaire de taille $V$.
 
 \newpage
 
@@ -188,14 +254,41 @@ Le préfixe soumis à \texttt{complete} a une longueur $L$.
 
 \subsection*{3a. \texttt{topK} via la table de fréquences \pts{4}}
 
-\answerspace{8em}
+Pour trouver les $k$ tokens les plus fréquents, on passe en revue tout le vocabulaire
+($V$ tokens) et on maintient un tas min de taille $\leq k$.
+
+Pour chaque token, on lit sa fréquence dans la \jclass{HashMap} en \bigo{1} amorti, on
+l'insère dans le tas en \bigo{\log k} et si le tas dépasse $k$ éléments on retire le
+minimum en \bigo{\log k}. En répétant ça pour les $V$ tokens, on obtient :
+\[\mathcal{O}(V \log k)\]
+Le tri final de la liste résultante coûte \bigo{k \log k}, ce qui est négligeable
+puisque $k \leq V$.
 
 \subsection*{3b. \texttt{complete} via le trie \pts{6}}
 
 \textit{Exprimer la complexité en distinguant la phase de descente au préfixe
 et la phase de DFS + sélection top-$k$.}
 
-\answerspace{10em}
+La méthode \texttt{complete(prefix, k)} se divise en deux phases bien séparées.
+
+\textbf{Phase 1 - Descente au noeud préfixe :}
+On suit les $L$ caractères du préfixe depuis la racine un par un. L'accès dans la
+\jclass{HashMap} des enfants de chaque noeud coûte \bigo{1} amorti. Si un caractère est
+absent à n'importe quelle étape on s'arrête immédiatement. Coût total : \bigo{L}.
+
+\textbf{Phase 2 - DFS + sélection top-$k$ :}
+Depuis le noeud préfixe, on fait un parcours en profondeur du sous-trie. Soit $P$ le
+nombre de noeuds visités et $V'$ le nombre de mots trouvés sous ce préfixe ($V' \leq V$).
+Pour chaque mot on fait une insertion dans le tas en \bigo{\log k}. Cette phase
+coûte donc \bigo{P + V' \log k}.
+
+\textbf{Complexité totale :}
+\[
+  \mathcal{O}\!\left(L + P + V' \log k\right)
+\]
+Dans le pire cas (préfixe très court ou vide), $P$ atteint le nombre total de nœuds du
+trie et $V' = V$. En pratique un préfixe plus long réduit fortement $P$ et $V'$ ce
+qui rend \texttt{complete} bien plus efficace que \texttt{topK} pour des requêtes précises.
 
 \newpage
 
