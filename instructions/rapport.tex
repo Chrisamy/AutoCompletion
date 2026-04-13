@@ -350,7 +350,24 @@ Votre réponse doit inclure :
   \item une conclusion sur le contexte où chaque approche serait préférable.
 \end{itemize}
 
-\answerspace{22em}
+L'autocompléteur utilise un Trie. Tel que mentionné dans la section 1, chaque noeud du Trie
+contient une HashMap<Character, TrieNode> pour ses enfants, un booléen
+\texttt{isEndOfWord} et un entier \texttt{frequency}. La trie suit aussi \texttt{size}
+(nombre de mots distincts insérés) et \texttt{nodeCount} (noeuds créés hors racine). 
+Parcourir l'arbre est une opération en O(|w|), soit la longueur des mots. La complexité mémoire
+d'un Trie, tel qu'évalué dans la section 2, est O(V), où V est le nombre de mots dans le vocabulaire.
+
+L'alternative proposé est le tableau trié. Le tableau serait trié par ordre alphabétique et serait
+parcourus par recherche binaire. Chaque comparaison de la recherche binaire se ferait en O(|w|), car
+nous comparons deux strings lettres par lettres. Une recherche binaire sur n éléments est de
+complexité O(logn). Puisque le tableau contient V entrées, il aurait une complexité en temps de O(logV).
+En terme de complexité mémoire, le tableau serait de taille O(V), soit une entrée pour chaque mot du vocabulaire.
+
+Le Trie est préférable pour le contexte d'autocompléteur grâce à sa rapidité d'opérations. Il n'y a pas d'avantage
+remarquable au tableau trié ici, à moins que les échantillons traités soit si petits qu'un Trie soit simplement
+plus complex à implémenter. Autre que ce cas presque trivial, Le Trie est supérieur en tout points.
+
+
 
 % =============================================================================
 \newpage
