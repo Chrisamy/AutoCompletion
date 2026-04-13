@@ -232,15 +232,55 @@ en décomposant chaque étape.
 
 \subsection*{2a. Construction de la table de fréquences (\texttt{unigrams}) \pts{4}}
 
-\answerspace{8em}
+La construction de la table de fréquence se fait avec la fonction increment(w). Cette fonction
+utilise trois opérations: 1. put(token, map.getOrDefault(token, 0) + 1), sois un put() sur une HashMap: \bigo{lettres}
+où lettres représente le nombre de lettres dans un mot. Dans ce put, une autre opération est appelée.
+2. getOrDefault(token, 0) sois un get() sur une HashMap avec une clé en String: \bigo{lettres} 3. totalCount++: \bigo{1}.
+En regroupant les complexités de la fonction, on obtient
+\bigo{lettres} + \bigo{lettres} + O(1) = \bigo{2 x lettres + 1} = \bigo{lettres}.
+
+La fonction insert(String word, int frequency) est appelée pour chaque mot dans le corpus, donc N fois.
+Sa complexité est donc \bigo{N x lettres}. Puisque lettres est bornée par une constante, la longueur du mot le plus
+long, la complexité peut être réduite à \bigo{N}.
 
 \subsection*{2b. Construction du trie \pts{4}}
 
-\answerspace{8em}
+La construction du trie se fait avec l'opération trie.insert(w, 1). L'insertion d'un mot
+dans un trie est de l'ordre de la taille du mot à insérer, puisque la fonction insert(String word, int frequency)
+boucle sur la taille du mot. On appel donc word.toCharArray() pour initialiser la boucle, une opération qui coûte
+\bigo{lettres} où lettres représente le nombre de lettres dans un mot. Dans cette boucle,les opérations appelées sont
+les suivantes: 1. get(c) sur une HashMap: \bigo{1} amorti 2. put(c, NewTrieNode()) sur une Hash map: \bigo{1)
+3. nodeCount++: \bigo{1} 4.get(c) sur une HashMap (encore): \bigo{1}.
+
+Toutes ces opérations sont en \bigo{1}. Puisque la boucle s'exécute lettres fois, elle est de \bigo{lettres}.
+Les opérations exécutées après la boucle sont tous en \bigo{1}. En regroupant les complexités de la fonction, on
+obtient \bigo{lettres} + \bigo{lettres} + \bigo{1} = \bigo{2 x lettres + 1} = \bigo{lettres).
+
+La fonction insert(String word, int frequency) est appelée pour chaque mot dans le corpus, donc N fois. Sa complexité
+est donc \bigo{N x lettres}. Par le même raisonnement qu'à la question précédente, \bigo{N x lettres} devient \bigo{N}.
+
+En terme d'espace mémoire, on ne crée de nouveaux node dans le trie que pour des nouveaux mots.
+La complexité mémoire est donc de \bigo{V x lettres} = \bigo{V}.
 
 \subsection*{2c. Construction des tables bigrammes et trigrammes \pts{4}}
 
-\answerspace{8em}
+La construction des tables bigrammes commence avec un get sur un HashMap en \bigo{1} amorti.
+Ensuite, computeIfAbsent(w_prev, k -> new HashFrequencyTable()) est appelé. Soit on accède à une HashMap avec une
+clé String, ce qui est en \bigo{lettres}, soit on crée une nouvelle HashMap en \bigo{1}. Donc en worst case
+\bigo{lettres}. Finalement, increment(w) est appelé. Comme calculé précédemment, increment(w) est en \bigo{lettres}.
+
+Au total, les bigrammes sont gérés N fois en \bigo{lettres}, ce qui donne une vitesse de \bigo{N}. En complexité
+mémoire, puisqu'il s'agit d'une HashMap de HashMap, on remarque qu'on store jusqu'à V valeur qui, chacune, store
+jusqu'à V entrées. Au total, on trouve une complexité mémoire de \bigo{V^2}.
+
+Pour les trigrammes, la seule différence est que la clé est une paire de strings. Il faut donc rajouter une opération
+trivial de concaténation de string \bigo{lettres}. computeUfAbsent(_, _) est presque identique avec la seule différence
+étant que la clé est deux fois plus longue. \bigo{2 lettres} = \bigo{lettres}. increment(w) est inchangé.
+\bigo{lettres}.
+
+La complexité total, par le même raisonnement qu'avec les bigrammes, est \bigo{N}.
+En terme de mémoire, le raisonnement est le même qu'avec les bigrammes, mais avec des triplets au lieu de paires.
+La complexité mémoire est donc \bigo{V^3}.
 
 % =============================================================================
 \section{Q3 — Complexité asymptotique des requêtes \pts{10}}
